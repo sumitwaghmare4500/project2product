@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+   
+</head>
+<body>
+    <form onsubmit="userdataToLocal(event)">
+        <label for="money">Selling Price</label>
+        <input type="number" id="money">
+        <label for="info">Prodcut Name</label>
+        <input type="text" id="info">
+        <label for="type">Choose a category</label>
+        <select name="expensetype" id="type">
+            <option value="food">Food Items</option>
+            <option value="skincare">Skincare Product</option>
+            <option value="electronic">Electronic</option>
+            
+          </select>
+        <button type="submit">Add Product</button>
+    </form>
+    <h1>Product</h1>
+    
+    <ul id="listOfItems"></ul>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+        
+        function userdataToLocal(event){
+            event.preventDefault();
+            const inputmoney=document.getElementById('money').value;
+            const inputinfo=document.getElementById('info').value;
+            const inputtype=document.getElementById('type').value;
+    
+            const user={
+            inputmoney,
+            inputinfo,
+            inputtype,
+        }
+        //showUserOnScreen(user)
+        axios.post("https://crudcrud.com/api/1b6f05bc66b348c4b8bdd1d8da946410/expense",user)
+        .then((response)=>{
+            
+            showUserOnScreen(response.data);
+        })
+        .catch((err)=>{
+            console.log(err)
+        })
+       
+        }
+        //when page is loaded the data  is rettrive
+         window.addEventListener("DOMContentLoaded",()=>{
+          axios.get("https://crudcrud.com/api/1b6f05bc66b348c4b8bdd1d8da946410/expense")
+          .then((response)=>{
+        
+            for(var i=0;i<response.data.length;i++){
+                showUserOnScreen(response.data[i]) 
+            }
+          })
+          .catch((error)=>{
+            console.log(error)
+          })
+        
+       
+        })
+           //show user data on screen
+         function showUserOnScreen(user){
+            document.getElementById("money").value='';
+            document.getElementById("info").value='';
+            document.getElementById("type").value='';
+
+          
+            const parentNode=document.getElementById('listOfItems')
+            const childHTML=`<li id='${user._id}'>${user.inputmoney}--${user.inputinfo}--${user.inputtype}
+                             <button onclick="deleteUser('${user._id}')">Delete</button>
+                             <button onclick="editUser('${user.inputmoney}','${user.inputinfo}','${user.inputtype}','${user._id}')">Edit</button>
+                             </li>`
+                       
+                  parentNode.innerHTML=parentNode.innerHTML+childHTML; 
+                     
+         }
+         
+         function deleteUser(userId){
+            axios.delete(`https://crudcrud.com/api/1b6f05bc66b348c4b8bdd1d8da946410/expense/${userId}`)
+            .then((resposne)=>{
+                removeUserFromScreen(userId)
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+         }
+         function removeUserFromScreen(userId){
+            const parentNode=document.getElementById('listOfItems');
+            const childNodetodelete=document.getElementById(userId)
+            if(childNodetodelete){
+                parentNode.removeChild(childNodetodelete)
+            }
+         }
+
+         function editUser(money,info,type,userId){
+            document.getElementById('money').value=money;
+            document.getElementById('info').value=info;
+            document.getElementById('type').value=type;
+            deleteUser(userId)
+         }
+    </script>
+</body>
+
+</html>
